@@ -17,20 +17,55 @@ export async function POST(request) {
   try {
     await dbConnect();
     const data = await request.json();
-    console.log('Received invoice data:', data);
+    console.log('Received invoice data:', JSON.stringify(data, null, 2));
     
     // Basic validation
-    if (!data.invoiceNumber || !data.customer || !Array.isArray(data.items) || data.items.length === 0) {
+    if (!data.customer || !Array.isArray(data.items) || data.items.length === 0) {
+      console.error('Invalid invoice data:', JSON.stringify(data, null, 2));
       return NextResponse.json({ error: 'Invalid invoice data' }, { status: 400 });
     }
 
-    // Ensure all items have string product names
+    // Generate a unique invoice number
+    const lastInvoice = await Invoice.findOne().sort({ createdAt: -1 });
+    let newInvoiceNumber;
+    if (lastInvoice && lastInvoice.invoiceNumber) {
+      const lastNumberStr = lastInvoice.invoiceNumber.replace(/^\D+/g, '');
+      const lastNumber = parseInt(lastNumberStr, 10) || 0;
+      newInvoiceNumber = `INV${(lastNumber + 1).toString().padStart(4, '0')}`;
+    } else {
+      newInvoiceNumber = 'INV0001';
+    }
+    data.invoiceNumber = newInvoiceNumber;
+    console.log('Generated invoice number:', data.invoiceNumber);
+
+    // Ensure all items have string product names and valid numbers
     data.items = data.items.map(item => ({
-      ...item,
-      product: String(item.product)
+      product: String(item.product),
+      quantity: Number(item.quantity),
+      price: Number(item.price)
     }));
 
+    // Calculate total if not provided
+    if (!data.total) {
+      data.total = data.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    }
+
+    // Ensure status is valid
+    if (!data.status) {
+      data.status = 'draft';
+    }
+
+    // Ensure dueDate is a valid Date
+    if (!data.dueDate) {
+      data.dueDate = new Date();
+    } else {
+      data.dueDate = new Date(data.dueDate);
+    }
+
+    console.log('Processed invoice data:', JSON.stringify(data, null, 2));
+
     const newInvoice = await Invoice.create(data);
+    console.log('Created invoice:', JSON.stringify(newInvoice, null, 2));
     return NextResponse.json(newInvoice, { status: 201 });
   } catch (error) {
     console.error('Error in POST /api/invoices:', error);

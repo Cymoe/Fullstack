@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import { SubscribeButton } from '@/components/SubscribeButton';
 
-const PricingTier = ({ name, price, features, recommended }) => (
+const PricingTier = ({ name, price, features, recommended, plan }) => (
   <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${recommended ? 'border-4 border-green-500' : ''}`}>
     {recommended && (
       <div className="bg-green-500 text-white text-center py-2 font-semibold">
@@ -20,25 +21,14 @@ const PricingTier = ({ name, price, features, recommended }) => (
           </li>
         ))}
       </ul>
-      <Link href="/signup" className="block text-center bg-green-500 text-white font-semibold py-2 px-4 rounded hover:bg-green-600 transition duration-300">
-        Get Started
-      </Link>
+      <SubscribeButton plan={plan} />
     </div>
   </div>
 );
 
 export default function Pricing() {
   const pricingTiers = [
-    {
-      name: "Basic",
-      price: 29,
-      features: [
-        "Up to 1,000 invoices/month",
-        "5 team members",
-        "Basic reporting",
-        "Email support"
-      ]
-    },
+    
     {
       name: "Pro",
       price: 79,
@@ -49,7 +39,17 @@ export default function Pricing() {
         "Priority email support",
         "API access"
       ],
-      recommended: true
+      recommended: true,
+      plan: {
+        link: process.env.NODE_ENV === 'development'
+          ? 'https://buy.stripe.com/test_00g9Ep90c5Sn9rO001'
+          : '',
+        priceId: process.env.NODE_ENV === 'development'
+          ? 'price_1PCxqQClvsFHzmDAGpD1MFww'
+          : '',
+        price: 79,
+        duration: '/month'
+      }
     },
     {
       name: "Enterprise",
@@ -61,7 +61,17 @@ export default function Pricing() {
         "24/7 phone support",
         "API access",
         "Dedicated account manager"
-      ]
+      ],
+      plan: {
+        link: process.env.NODE_ENV === 'development'
+          ? 'https://buy.stripe.com/test_28o5u5dcs80z9rO002'
+          : '',
+        priceId: process.env.NODE_ENV === 'development'
+          ? 'price_1PCxqQClvsFHzmDAGpD1MFww'
+          : '',
+        price: 199,
+        duration: '/month'
+      }
     }
   ];
 
@@ -96,9 +106,9 @@ export default function Pricing() {
 
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold text-center mb-12">Choose Your Plan</h1>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
           {pricingTiers.map((tier, index) => (
-            <PricingTier key={index} {...tier} />
+            <PricingTier key={index} {...tier} plan={tier.plan} />
           ))}
         </div>
         <p className="text-center mt-12 text-gray-600">

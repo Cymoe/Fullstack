@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function InvoiceForm({ invoice, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
-    invoiceNumber: '',
     customer: '',
     items: [],
     total: 0,
@@ -88,7 +87,7 @@ export default function InvoiceForm({ invoice, onSubmit, onCancel }) {
         price: parseFloat(item.price) || 0
       }))
     };
-    console.log('Submitting invoice data:', submissionData); // Log the data being submitted
+    console.log('Submitting invoice data:', JSON.stringify(submissionData, null, 2));
     onSubmit(submissionData);
   };
 
@@ -99,16 +98,6 @@ export default function InvoiceForm({ invoice, onSubmit, onCancel }) {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="invoiceNumber">Invoice Number</Label>
-            <Input
-              id="invoiceNumber"
-              name="invoiceNumber"
-              value={formData.invoiceNumber}
-              onChange={handleChange}
-              required
-            />
-          </div>
           <div>
             <Label htmlFor="customer">Customer</Label>
             <Select name="customer" value={formData.customer} onValueChange={(value) => setFormData(prev => ({ ...prev, customer: value }))}>

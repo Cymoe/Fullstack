@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 
 const InvoiceSchema = new mongoose.Schema({
-  invoiceNumber: { type: String, required: true, unique: true },
+  invoiceNumber: { type: String, required: true, unique: true, index: true },
   customer: { type: String, required: true },
   items: [{
-    product: { type: String, required: true }, // Ensure this is String, not ObjectId
+    product: { type: String, required: true },
     quantity: { type: Number, required: true },
     price: { type: Number, required: true }
   }],
