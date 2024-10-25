@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import InvoiceForm from './InvoiceForm';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 export default function InvoiceList() {
   const [invoices, setInvoices] = useState([]);
@@ -35,13 +36,9 @@ export default function InvoiceList() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newInvoice),
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to create invoice: ${errorData.error || response.statusText}`);
-      }
+      if (!response.ok) throw new Error('Failed to create invoice');
       fetchInvoices();
     } catch (err) {
-      console.error('Error creating invoice:', err);
       setError(err.message);
     }
   };
@@ -77,25 +74,44 @@ export default function InvoiceList() {
   return (
     <div className="space-y-4">
       <InvoiceForm onSubmit={handleCreate} />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {invoices.map(invoice => (
-          <Card key={invoice._id}>
-            <CardHeader>
-              <CardTitle>Invoice #{invoice.invoiceNumber}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Customer: {invoice.customer}</p>
-              <p>Total: ${invoice.total ? invoice.total.toFixed(2) : '0.00'}</p>
-              <p>Status: {invoice.status}</p>
-              <p>Due Date: {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'Not set'}</p>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={() => setEditingInvoice(invoice)}>Edit</Button>
-              <Button variant="destructive" onClick={() => handleDelete(invoice._id)}>Delete</Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Invoice List</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Invoice Number</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Due Date</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {invoices.map(invoice => (
+                <TableRow key={invoice._id}>
+                  <TableCell>{invoice.invoiceNumber}</TableCell>
+                  <TableCell>{invoice.customer}</TableCell>
+                  <TableCell>
+                    {invoice.total != null ? `$${invoice.total.toFixed(2)}` : 'N/A'}
+                  </TableCell>
+                  <TableCell>{invoice.status}</TableCell>
+                  <TableCell>
+                    {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="outline" onClick={() => setEditingInvoice(invoice)} className="mr-2">Edit</Button>
+                    <Button variant="destructive" onClick={() => handleDelete(invoice._id)}>Delete</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
       {editingInvoice && (
         <InvoiceForm 
           invoice={editingInvoice} 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import CustomerForm from './CustomerForm';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 export default function CustomerList() {
   const [customers, setCustomers] = useState([]);
@@ -73,24 +74,38 @@ export default function CustomerList() {
   return (
     <div className="space-y-4">
       <CustomerForm onSubmit={handleCreate} />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {customers.map(customer => (
-          <Card key={customer._id}>
-            <CardHeader>
-              <CardTitle>{customer.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Email: {customer.email}</p>
-              <p>Phone: {customer.phone}</p>
-              <p>Address: {customer.address}</p>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={() => setEditingCustomer(customer)}>Edit</Button>
-              <Button variant="destructive" onClick={() => handleDelete(customer._id)}>Delete</Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Customer List</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {customers.map(customer => (
+                <TableRow key={customer._id}>
+                  <TableCell>{customer.name}</TableCell>
+                  <TableCell>{customer.email}</TableCell>
+                  <TableCell>{customer.phone}</TableCell>
+                  <TableCell>{customer.address}</TableCell>
+                  <TableCell>
+                    <Button variant="outline" onClick={() => setEditingCustomer(customer)} className="mr-2">Edit</Button>
+                    <Button variant="destructive" onClick={() => handleDelete(customer._id)}>Delete</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
       {editingCustomer && (
         <CustomerForm 
           customer={editingCustomer} 
